@@ -1,0 +1,73 @@
+#include <LiquidCrystal.h>
+#include <DHT.h>
+
+#define DHTPIN 2     
+#define DHTTYPE DHT22   
+#define ECHO_PIN 4
+#define TRIG_PIN 5
+
+
+DHT dht(DHTPIN, DHTTYPE); 
+int rs = 13, en = 11, d4 = 9, d5 = 8, d6 = 7, d7 = 6;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+float hum;  
+float temp; 
+float dist = 0;
+int voltas = 0;
+byte degreeSymbol[8] = {
+  0b00111,
+  0b00101,
+  0b00111,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000
+};
+
+
+void setup() {
+    lcd.begin(16, 2);
+    lcd.clear();
+    dht.begin();
+    pinMode(TRIG_PIN, OUTPUT);
+    pinMode(ECHO_PIN, INPUT);
+    lcd.createChar(0, degreeSymbol);
+    Serial.begin(9600);
+}
+
+void loop() {    
+    hum = dht.readHumidity();
+    temp = dht.readTemperature();  
+    digitalWrite(TRIG_PIN, LOW);
+  	delayMicroseconds(5);
+  	digitalWrite(TRIG_PIN, HIGH);
+  	delayMicroseconds(10);
+  	digitalWrite(TRIG_PIN, LOW);
+  	dist = pulseIn(ECHO_PIN, HIGH);
+  	dist = dist/58;
+
+    
+    lcd.clear();    
+    
+    lcd.setCursor(0, 0);    
+    lcd.print("Temp:");
+    lcd.setCursor(5, 0);
+    lcd.print(temp);
+    lcd.write(byte(0)); 
+    lcd.print("C");    
+    lcd.setCursor(0,1);
+    lcd.print("Voltas: ");
+    lcd.print(voltas);
+
+    if(dist < 300){//o 300 pode variar dependendo da configuração da pista
+      voltas++;
+    }
+    
+    
+      
+    
+
+    delay(400);
+
+}
